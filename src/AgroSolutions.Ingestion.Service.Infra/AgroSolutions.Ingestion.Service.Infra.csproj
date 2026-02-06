@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\AgroSolutions.Ingestion.Service.Application\AgroSolutions.Ingestion.Service.Application.csproj" />
+	</ItemGroup>
+	
+</Project>

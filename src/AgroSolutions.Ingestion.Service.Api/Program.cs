@@ -18,6 +18,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 
 #region MongoDB
 
@@ -52,7 +53,7 @@ builder.Services.AddMassTransit(busConfigurator =>
 #region DIs
 
 builder.Services.AddScoped<IIngestionAppService, IngestionAppService>();
-
+builder.Services.AddScoped<IWeatherService, WeatherService>();
 #endregion
 
 #region Swagger

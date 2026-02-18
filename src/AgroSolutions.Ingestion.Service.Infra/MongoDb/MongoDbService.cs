@@ -1,4 +1,5 @@
 using AgroSolutions.Ingestion.Service.Application.Dtos.Sensor;
+using AgroSolutions.Ingestion.Service.Application.Dtos.Weather;
 using AgroSolutions.Ingestion.Service.Application.Interfaces;
 using MongoDB.Driver;
 
@@ -13,7 +14,7 @@ public class MongoDbService : IMongoDbService
         _collection = database.GetCollection<DadosSensorDocument>("sensores");
     }
 
-    public async Task SalvarDadosSensorAsync(ReceberDadosSensorDto dto)
+    public async Task SalvarDadosSensorAsync(ReceberDadosSensorDto dto, PrevisaoClimaDto? previsaoClima = null)
     {
         var documento = new DadosSensorDocument
         {
@@ -22,7 +23,18 @@ public class MongoDbService : IMongoDbService
             UmidadeSolo = dto.UmidadeSolo,
             Temperatura = dto.Temperatura,
             Precipitacao = dto.Precipitacao,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.UtcNow,
+            // Dados de previsão do tempo
+            PrevisaoClima = previsaoClima != null ? new PrevisaoClimaDocument
+            {
+                NomeLocalizacao = previsaoClima.NomeLocalizacao,
+                Latitude = previsaoClima.Latitude,
+                Longitude = previsaoClima.Longitude,
+                Temperatura = previsaoClima.Temperatura,
+                UmidadeRelativa = previsaoClima.UmidadeRelativa,
+                VelocidadeVento = previsaoClima.VelocidadeVento,
+                DataConsulta = previsaoClima.DataConsulta
+            } : null
         };
 
         await _collection.InsertOneAsync(documento);
@@ -62,4 +74,17 @@ public class DadosSensorDocument
     public decimal Temperatura { get; set; }
     public decimal Precipitacao { get; set; }
     public DateTime Timestamp { get; set; }
+
+    public PrevisaoClimaDocument? PrevisaoClima { get; set; }
+}
+
+public class PrevisaoClimaDocument
+{
+    public string NomeLocalizacao { get; set; } = string.Empty;
+    public string Latitude { get; set; }
+    public string Longitude { get; set; }
+    public float Temperatura { get; set; }
+    public float UmidadeRelativa { get; set; }
+    public float VelocidadeVento { get; set; }
+    public DateTime DataConsulta { get; set; }
 }

@@ -24,4 +24,5 @@ RUN dotnet publish "AgroSolutions.Ingestion.Service.Api.csproj" -c Release -o /a
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 ENTRYPOINT ["dotnet", "AgroSolutions.Ingestion.Service.Api.dll"]

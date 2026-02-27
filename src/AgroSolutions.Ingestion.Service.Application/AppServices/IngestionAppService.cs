@@ -10,28 +10,28 @@ namespace AgroSolutions.Ingestion.Service.Application.AppServices;
 public class IngestionAppService : IIngestionAppService
 {
     private readonly IMongoDbService _mongoDbService;
-    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IBus _bus;
     private readonly IWeatherService _weatherService;
     private readonly ILogger<IngestionAppService> _logger;
 
     public IngestionAppService(
         IMongoDbService mongoDbService,
-        IPublishEndpoint publishEndpoint,
+        IBus bus,
         IWeatherService weatherService,
         ILogger<IngestionAppService> logger)
     {
         _mongoDbService = mongoDbService;
-        _publishEndpoint = publishEndpoint;
+        _bus = bus;
         _weatherService = weatherService;
         _logger = logger;
     }
 
     public async Task ReceberDadosSensorAsync(ReceberDadosSensorDto dto)
     {
-        _logger.LogInformation("Recebendo dados de sensor para talhão {TalhaoId}", dto.TalhaoId);
+        _logger.LogInformation("Recebendo dados de sensor para talhao {TalhaoId}", dto.TalhaoId);
 
-        // Verificar se os dados do sensor estão preenchidos
-        // Se não estiverem, buscar previsão do tempo como fallback
+        // Verificar se os dados do sensor estao preenchidos
+        // Se nao estiverem, buscar previsao do tempo como fallback
         PrevisaoClimaDto? previsaoClima = null;
         bool dadosDoSensor = dto.Temperatura != 0 || dto.UmidadeSolo != 0;
 
@@ -40,7 +40,7 @@ public class IngestionAppService : IIngestionAppService
             previsaoClima = await _weatherService.ObterPrevisaoAleatoriaAsync();
 
             _logger.LogInformation(
-                "Dados do sensor não preenchidos - usando previsão do tempo: {Local} - Temp: {Temp}°C, Umidade: {Umidade}%",
+                "Dados do sensor nao preenchidos - usando previsao do tempo: {Local} - Temp: {Temp}C, Umidade: {Umidade}%",
                 previsaoClima.NomeLocalizacao,
                 previsaoClima.Temperatura,
                 previsaoClima.UmidadeRelativa);
@@ -56,8 +56,14 @@ public class IngestionAppService : IIngestionAppService
             Precipitacao = dto.Precipitacao
         };
 
-        await _publishEndpoint.Publish(evento);
+        // Publicar evento para o worker
+        _logger.LogInformation("===============================================");
+        _logger.LogInformation("PUBLICANDO EVENTO PARA O RABBITMQ...");
+        _logger.LogInformation("Tipo do evento: {EventType}", typeof(DadosSensorRecebidosEvent).FullName);
+        _logger.LogInformation("===============================================");
+        await _bus.Publish(evento);
+        _logger.LogInformation("Evento publicado com sucesso!");
 
-        _logger.LogInformation("Dados de sensor processados e evento publicado para talhão {TalhaoId}", dto.TalhaoId);
+        _logger.LogInformation("Dados de sensor processados e publicados para o barramento talhao {TalhaoId}", dto.TalhaoId);
     }
 }

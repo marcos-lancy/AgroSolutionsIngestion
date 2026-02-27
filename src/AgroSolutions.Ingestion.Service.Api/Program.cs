@@ -41,10 +41,10 @@ builder.Services.AddMassTransit(busConfigurator =>
         var rabbitMqUsername = builder.Configuration["MessageBroker:Username"] ?? "admin";
         var rabbitMqPassword = builder.Configuration["MessageBroker:Password"] ?? "admin123";
 
-        cfg.Host("localhost", 5672, "/", hostConfigurator =>
+        cfg.Host(rabbitMqHost, 5672, "/", hostConfigurator =>
         {
-            hostConfigurator.Username("admin");
-            hostConfigurator.Password("admin123");
+            hostConfigurator.Username(rabbitMqUsername);
+            hostConfigurator.Password(rabbitMqPassword);
         });
     });
 });
